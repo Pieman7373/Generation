@@ -37,9 +37,9 @@ int _x;
 int _y;
 int offset = 10;
 int xmin = 0;
-int xmax = 30;
+int xmax = 39;
 int ymin = 0;
-int ymax = 20;
+int ymax = 178;
 int treecolor = 0x03;
 int floorcolor = 0xFF;
 int wallcolor = 0xE0;
@@ -55,7 +55,7 @@ int room_h;
 
 room_t r[600];
 
-int map[30][20];
+int map[40][179];
 
 void main(void) {
 	gfx_Begin();
@@ -81,8 +81,7 @@ void drawmap() {
 			else if (map[_x][_y] == 0){
 				gfx_SetColor(floorcolor);
 			}
-			gfx_SetTextXY((_x*8)+offset,(_y*8)+offset);
-			gfx_PrintStringXY("o",(_x*8)+offset,(_y*8)+offset);
+			gfx_SetPixel(_x+offset,_y+offset);
 		}
 	}
 }
@@ -106,7 +105,7 @@ void genrooms() {
 		else {
 			fmax--;
 		}
-	} while (fmax > 0 || rmax > 0);
+	} while (fmax > 0 && rmax > 0);
 }
 
 void randroom(int mn_w,int mx_w,int mn_h,int mx_h) {

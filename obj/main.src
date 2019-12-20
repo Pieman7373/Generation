@@ -16,13 +16,13 @@ _xmin:
 	DW	0
 	DB	0
 _xmax:
-	DW	30
+	DW	39
 	DB	0
 _ymin:
 	DW	0
 	DB	0
 _ymax:
-	DW	20
+	DW	178
 	DB	0
 _treecolor:
 	DW	3
@@ -59,7 +59,7 @@ _room_h:
 _r:
 	DS	7200
 _map:
-	DS	1800
+	DS	21480
 ;    1	/*
 ;    2	 *--------------------------------------
 ;    3	 * Program Name:
@@ -99,9 +99,9 @@ _map:
 ;   37	int _y;
 ;   38	int offset = 10;
 ;   39	int xmin = 0;
-;   40	int xmax = 30;
+;   40	int xmax = 39;
 ;   41	int ymin = 0;
-;   42	int ymax = 20;
+;   42	int ymax = 178;
 ;   43	int treecolor = 0x03;
 ;   44	int floorcolor = 0xFF;
 ;   45	int wallcolor = 0xE0;
@@ -117,7 +117,7 @@ _map:
 ;   55	
 ;   56	room_t r[600];
 ;   57	
-;   58	int map[30][20];
+;   58	int map[40][179];
 	SEGMENT CODE
 ;   59	
 ;   60	void main(void) {
@@ -181,8 +181,8 @@ L_13:
 L_10:
 ;   78				if (map[_x][_y] == 1){
 	LD	HL,(__x)
-	LD	A,60
-	CALL	__imul_b
+	LD	BC,537
+	CALL	__imulu
 	LD	BC,_map
 	ADD	HL,BC
 	LD	(IX+-6),HL
@@ -222,49 +222,27 @@ L_8:
 	POP	BC
 ;   83				}
 L_9:
-;   84				gfx_SetTextXY((_x*8)+offset,(_y*8)+offset);
-	LD	HL,(__y)
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	LD	BC,(_offset)
-	ADD	HL,BC
-	PUSH	HL
-	LD	HL,(__x)
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	LD	BC,(_offset)
-	ADD	HL,BC
-	PUSH	HL
-	CALL	_gfx_SetTextXY
-	POP	BC
-	POP	BC
-;   85				gfx_PrintStringXY("o",(_x*8)+offset,(_y*8)+offset);
-	LD	HL,(__y)
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	LD	BC,(_offset)
-	ADD	HL,BC
-	PUSH	HL
-	LD	HL,(__x)
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	LD	BC,(_offset)
-	ADD	HL,BC
-	PUSH	HL
-	LD	BC,L__4
+;   84				gfx_SetPixel(_x+offset,_y+offset);
+	LD	A,(__y)
+	LD	B,A
+	LD	A,(_offset)
+	LD	C,A
+	LD	A,B
+	ADD	A,C
+	LD	C,A
+	LD	B,0
 	PUSH	BC
-	CALL	_gfx_PrintStringXY
-	POP	BC
+	LD	BC,(_offset)
+	LD	HL,(__x)
+	ADD	HL,BC
+	PUSH	HL
+	CALL	_gfx_SetPixel
 	POP	BC
 	POP	BC
 	LD	BC,(__y)
 	INC	BC
 	LD	(__y),BC
-;   86			}
+;   85			}
 L_12:
 	LD	BC,(_ymax)
 	LD	HL,(__y)
@@ -274,7 +252,7 @@ L_12:
 	LD	BC,(__x)
 	INC	BC
 	LD	(__x),BC
-;   87		}
+;   86		}
 L_15:
 	LD	BC,(_xmax)
 	LD	HL,(__x)
@@ -282,7 +260,7 @@ L_15:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_13
-;   88	}
+;   87	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -292,13 +270,12 @@ L_15:
 ;Name                         Addr/Register   Size   Type
 ;_xmax                               STATIC      3   variable
 ;_ymax                               STATIC      3   variable
-;_gfx_PrintStringXY                  IMPORT  -----   function
 ;_offset                             STATIC      3   variable
-;_gfx_SetTextXY                      IMPORT  -----   function
+;_gfx_SetPixel                       IMPORT  -----   function
 ;_floorcolor                         STATIC      3   variable
 ;_wallcolor                          STATIC      3   variable
 ;_gfx_SetColor                       IMPORT  -----   function
-;_map                                STATIC   1800   variable
+;_map                                STATIC  21480   variable
 ;__y                                 STATIC      3   variable
 ;_ymin                               STATIC      3   variable
 ;__x                                 STATIC      3   variable
@@ -312,19 +289,14 @@ L_15:
 ;       Spill Code: 0 (instruction)
 
 
-	SEGMENT STRSECT
-L__4:
-	DB	"o"
-	DB	0
-	SEGMENT CODE
-;   89	
-;   90	void mapgen() {
+;   88	
+;   89	void mapgen() {
 _mapgen:
-;   91		genrooms();
+;   90		genrooms();
 	CALL	_genrooms
-;   92		//mazeworm();
-;   93		//placeflags();
-;   94	}
+;   91		//mazeworm();
+;   92		//placeflags();
+;   93	}
 	RET	
 
 
@@ -337,21 +309,21 @@ _mapgen:
 ;       Spill Code: 0 (instruction)
 
 
-;   95	
-;   96	void genrooms() {
+;   94	
+;   95	void genrooms() {
 _genrooms:
 	LD	HL,-6
 	CALL	__frameset
-;   97		int fmax=10;
+;   96		int fmax=10;
 	LD	BC,10
 	LD	(IX+-3),BC
-;   98		int rmax=10;
+;   97		int rmax=10;
 	LD	(IX+-6),BC
-;   99		max_w = 10;
+;   98		max_w = 10;
 	LD	(_max_w),BC
-;  100		max_h = 10;
+;   99		max_h = 10;
 	LD	(_max_h),BC
-;  101		randroom(min_w,max_w,min_h,max_h);
+;  100		randroom(min_w,max_w,min_h,max_h);
 	PUSH	BC
 	LD	BC,(_min_h)
 	PUSH	BC
@@ -364,9 +336,9 @@ _genrooms:
 	POP	BC
 	POP	BC
 	POP	BC
-;  102		do {
+;  101		do {
 L_23:
-;  103			if (placeroom(room_w, room_h)) {
+;  102			if (placeroom(room_w, room_h)) {
 	LD	BC,(_room_h)
 	PUSH	BC
 	LD	BC,(_room_w)
@@ -376,27 +348,27 @@ L_23:
 	POP	BC
 	OR	A,A
 	JR	Z,L_21
-;  104				rmax--;
+;  103				rmax--;
 	LD	BC,(IX+-6)
 	DEC	BC
 	LD	(IX+-6),BC
-;  105			} 
-;  106			else {
+;  104			} 
+;  105			else {
 	JR	L_24
 L_21:
-;  107				fmax--;
+;  106				fmax--;
 	LD	BC,(IX+-3)
 	DEC	BC
 	LD	(IX+-3),BC
-;  108			}
-;  109		} while (fmax > 0 || rmax > 0);
+;  107			}
+;  108		} while (fmax > 0 && rmax > 0);
 L_24:
 	LD	BC,(IX+-3)
 	OR	A,A
 	SBC	HL,HL
 	OR	A,A
 	SBC	HL,BC
-	JP	M,L_23
+	JP	P,L_25
 	LD	BC,(IX+-6)
 	OR	A,A
 	SBC	HL,HL
@@ -404,7 +376,8 @@ L_24:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_23
-;  110	}
+;  109	}
+L_25:
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -428,12 +401,12 @@ L_24:
 ;       Spill Code: 0 (instruction)
 
 
-;  111	
-;  112	void randroom(int mn_w,int mx_w,int mn_h,int mx_h) {
+;  110	
+;  111	void randroom(int mn_w,int mx_w,int mn_h,int mx_h) {
 _randroom:
 	LD	HL,-6
 	CALL	__frameset
-;  113		room_w = randInt(mn_w,mx_w);
+;  112		room_w = randInt(mn_w,mx_w);
 	CALL	_random
 	LD	(IX+-3),HL
 	LD	HL,(IX+9)
@@ -447,7 +420,7 @@ _randroom:
 	CALL	__iremu
 	ADD	HL,DE
 	LD	(_room_w),HL
-;  114		room_h = randInt(mn_h,mx_h);
+;  113		room_h = randInt(mn_h,mx_h);
 	CALL	_random
 	LD	(IX+-6),HL
 	LD	HL,(IX+15)
@@ -461,7 +434,7 @@ _randroom:
 	CALL	__iremu
 	ADD	HL,DE
 	LD	(_room_h),HL
-;  115	}
+;  114	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -482,32 +455,32 @@ _randroom:
 ;       Spill Code: 0 (instruction)
 
 
-;  116	
-;  117	bool placeroom(int w,int h) {
+;  115	
+;  116	bool placeroom(int w,int h) {
 _placeroom:
 	LD	HL,-45
 	CALL	__frameset
-;  118		int r_x;
-;  119		int r_y;
-;  120		int R;
-;  121		int rp_x;
-;  122		int rp_y;
-;  123		int mx;
-;  124		int my;
-;  125		num_rcands = 0;
+;  117		int r_x;
+;  118		int r_y;
+;  119		int R;
+;  120		int rp_x;
+;  121		int rp_y;
+;  122		int mx;
+;  123		int my;
+;  124		num_rcands = 0;
 	LD	BC,0
 	LD	(_num_rcands),BC
-;  126		for (r_x=xmin;r_x<(xmax-w);r_x++){
+;  125		for (r_x=xmin;r_x<(xmax-w);r_x++){
 	LD	BC,(_xmin)
 	LD	(IX+-9),BC
 	JR	L_36
 L_34:
-;  127			for (r_y=ymin;r_y<(ymax-h);r_y++){
+;  126			for (r_y=ymin;r_y<(ymax-h);r_y++){
 	LD	BC,(_ymin)
 	LD	(IX+-6),BC
 	JR	L_33
 L_31:
-;  128				if (doesroomfit(r_x,r_y,w,h)) {
+;  127				if (doesroomfit(r_x,r_y,w,h)) {
 	LD	BC,(IX+9)
 	PUSH	BC
 	LD	BC,(IX+6)
@@ -523,7 +496,7 @@ L_31:
 	POP	BC
 	OR	A,A
 	JR	Z,L_32
-;  129					r[num_rcands].x=r_x;
+;  128					r[num_rcands].x=r_x;
 	LD	HL,(_num_rcands)
 	LD	A,12
 	CALL	__imul_b
@@ -533,21 +506,21 @@ L_31:
 	LD	BC,(IX+-9)
 	LD	IY,(IX+-36)
 	LD	(IY+0),BC
-;  130					r[num_rcands].y=r_y;
+;  129					r[num_rcands].y=r_y;
 	LD	BC,(IX+-6)
 	LD	(IY+3),BC
-;  131					r[num_rcands].w=w;
+;  130					r[num_rcands].w=w;
 	LD	BC,(IX+6)
 	LD	(IY+6),BC
-;  132					r[num_rcands].h=h;
+;  131					r[num_rcands].h=h;
 	LD	BC,(IX+9)
 	LD	(IY+9),BC
-;  133					num_rcands++;
+;  132					num_rcands++;
 	LD	BC,(_num_rcands)
 	INC	BC
 	LD	(_num_rcands),BC
-;  134				}
-;  135			}
+;  133				}
+;  134			}
 L_32:
 	LD	BC,(IX+-6)
 	INC	BC
@@ -565,7 +538,7 @@ L_33:
 	LD	BC,(IX+-9)
 	INC	BC
 	LD	(IX+-9),BC
-;  136		}
+;  135		}
 L_36:
 	LD	HL,(_xmax)
 	LD	BC,(IX+6)
@@ -577,22 +550,22 @@ L_36:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_34
-;  137		if (num_rcands==0){
+;  136		if (num_rcands==0){
 	LD	HL,(_num_rcands)
 	CALL	__icmpzero
 	JR	NZ,L_39
-;  138			return false;
+;  137			return false;
 	XOR	A,A
 	JR	L_49
-;  139		}
+;  138		}
 L_39:
-;  140		R=randInt(0,num_rcands);
+;  139		R=randInt(0,num_rcands);
 	CALL	_random
 	LD	BC,(_num_rcands)
 	INC	BC
 	CALL	__iremu
 	LD	(IX+-30),HL
-;  141		for (rp_x=r[R].x;rp_x<(r[R].x+r[R].w);rp_x++){
+;  140		for (rp_x=r[R].x;rp_x<(r[R].x+r[R].w);rp_x++){
 	LD	A,12
 	CALL	__imul_b
 	LD	(IX+-21),HL
@@ -603,7 +576,7 @@ L_39:
 	LD	(IX+-15),BC
 	JR	L_47
 L_45:
-;  142			for (rp_y=r[R].y;rp_y<(r[R].y+r[R].h);rp_y++){
+;  141			for (rp_y=r[R].y;rp_y<(r[R].y+r[R].h);rp_y++){
 	LD	BC,(IX+-12)
 	LD	(IX+-24),BC
 	LD	HL,(IX+-12)
@@ -614,7 +587,7 @@ L_45:
 	LD	(IX+-18),BC
 	JR	L_44
 L_42:
-;  143				mx=r[R].x;
+;  142				mx=r[R].x;
 	LD	BC,(IX+-3)
 	LD	(IX+-24),BC
 	LD	HL,(IX+-3)
@@ -624,13 +597,13 @@ L_42:
 	LD	IY,(IX+-39)
 	LD	BC,(IY+0)
 	LD	(IX+-33),BC
-;  144				my=r[R].y;
+;  143				my=r[R].y;
 	LD	BC,(IY+3)
 	LD	(IX+-27),BC
-;  145				map[mx][my]=0;
+;  144				map[mx][my]=0;
 	LD	HL,(IX+-33)
-	LD	A,60
-	CALL	__imul_b
+	LD	BC,537
+	CALL	__imulu
 	LD	BC,_map
 	ADD	HL,BC
 	LD	BC,HL
@@ -644,7 +617,7 @@ L_42:
 	LD	BC,(IX+-18)
 	INC	BC
 	LD	(IX+-18),BC
-;  146			}
+;  145			}
 L_44:
 	LD	BC,(IX+-24)
 	LD	(IX+-3),BC
@@ -666,7 +639,7 @@ L_44:
 	LD	BC,(IX+-15)
 	INC	BC
 	LD	(IX+-15),BC
-;  147		}
+;  146		}
 L_47:
 	LD	BC,(IX+-21)
 	LD	(IX+-12),BC
@@ -684,9 +657,9 @@ L_47:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_45
-;  148		return true;
+;  147		return true;
 	LD	A,1
-;  149	}
+;  148	}
 L_49:
 	LD	SP,IX
 	POP	IX
@@ -695,7 +668,7 @@ L_49:
 
 ;**************************** _placeroom ***************************
 ;Name                         Addr/Register   Size   Type
-;_map                                STATIC   1800   variable
+;_map                                STATIC  21480   variable
 ;_random                             IMPORT  -----   function
 ;_xmax                               STATIC      3   variable
 ;_ymax                               STATIC      3   variable
@@ -723,29 +696,29 @@ L_49:
 ;       Spill Code: 0 (instruction)
 
 
-;  150	
-;  151	bool doesroomfit(int x,int y,int w,int h) {
+;  149	
+;  150	bool doesroomfit(int x,int y,int w,int h) {
 _doesroomfit:
 	LD	HL,-6
 	CALL	__frameset
-;  152		int r_x;
-;  153		int r_y;
-;  154		for (r_x=(x-1);r_x<x+(w+1);r_x++){
+;  151		int r_x;
+;  152		int r_y;
+;  153		for (r_x=(x-1);r_x<x+(w+1);r_x++){
 	LD	BC,(IX+6)
 	DEC	BC
 	LD	(IX+-3),BC
 	JR	L_63
 L_61:
-;  155			for (r_y=(y-1);r_y<y+(h+1);r_y++){
+;  154			for (r_y=(y-1);r_y<y+(h+1);r_y++){
 	LD	BC,(IX+9)
 	DEC	BC
 	LD	(IX+-6),BC
 	JR	L_60
 L_58:
-;  156				if (map[r_x][r_y]==0){
+;  155				if (map[r_x][r_y]==0){
+	LD	BC,537
 	LD	HL,(IX+-3)
-	LD	A,60
-	CALL	__imul_b
+	CALL	__imulu
 	LD	BC,_map
 	ADD	HL,BC
 	LD	BC,HL
@@ -757,32 +730,32 @@ L_58:
 	LD	HL,(HL)
 	CALL	__icmpzero
 	JR	NZ,L_59
-;  157					if (w>=h) {
+;  156					if (w>=h) {
 	LD	BC,(IX+15)
 	LD	HL,(IX+12)
 	OR	A,A
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_55
-;  158						max_w--;
+;  157						max_w--;
 	LD	BC,(_max_w)
 	DEC	BC
 	LD	(_max_w),BC
-;  159					}
-;  160					else {
+;  158					}
+;  159					else {
 	JR	L_56
 L_55:
-;  161						max_h--;
+;  160						max_h--;
 	LD	BC,(_max_h)
 	DEC	BC
 	LD	(_max_h),BC
-;  162					}
+;  161					}
 L_56:
-;  163					return false;
+;  162					return false;
 	XOR	A,A
 	JR	L_65
-;  164				}
-;  165			}
+;  163				}
+;  164			}
 L_59:
 	LD	BC,(IX+-6)
 	INC	BC
@@ -801,7 +774,7 @@ L_60:
 	LD	BC,(IX+-3)
 	INC	BC
 	LD	(IX+-3),BC
-;  166		}
+;  165		}
 L_63:
 	LD	HL,(IX+12)
 	INC	HL
@@ -813,7 +786,7 @@ L_63:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_61
-;  167		return true;
+;  166		return true;
 	LD	A,1
 L_65:
 	LD	SP,IX
@@ -825,7 +798,7 @@ L_65:
 ;Name                         Addr/Register   Size   Type
 ;_max_h                              STATIC      3   variable
 ;_max_w                              STATIC      3   variable
-;_map                                STATIC   1800   variable
+;_map                                STATIC  21480   variable
 ;r_y                                   IX-6      3   variable
 ;r_x                                   IX-3      3   variable
 ;h                                    IX+15      3   parameter
@@ -839,13 +812,13 @@ L_65:
 
 
 	XREF _kb_Scan:ROM
-	XREF _gfx_SetTextXY:ROM
-	XREF _gfx_PrintStringXY:ROM
+	XREF _gfx_SetPixel:ROM
 	XREF _gfx_FillScreen:ROM
 	XREF _gfx_SetColor:ROM
 	XREF _gfx_End:ROM
 	XREF _gfx_Begin:ROM
 	XREF _random:ROM
+	XREF __imulu:ROM
 	XREF __iremu:ROM
 	XREF __frameset:ROM
 	XREF __setflag:ROM
