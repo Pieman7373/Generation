@@ -3,10 +3,10 @@
 
 
 typedef struct r{
-	int x;
-	int y;
-	int w;
-	int h;
+	uint8_t x;
+	uint8_t y;
+	uint8_t w;
+	uint8_t h;
 }room_t;
 extern room_t r[];
 

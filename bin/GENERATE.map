@@ -1,0 +1,81 @@
+Segment  Base   Top    High   Length
+-------- ------ ------ ------ -------
+icon     D1A882 D1A999           117h
+launcher D1A999 D1A9F1            58h
+libs     D1A9F1 D1AA36            45h
+startup  D1AA36 D1AA75            3Fh
+cleanup  D1AA75 D1AA89            14h
+exit     D1AA89 D1AA8F             6h
+code     D1AA8F D1AFCB           53Ch
+data     D1AFCB D1B01B            50h
+strsect  D1B01B D1B01B             0h
+text     D1B01B D1B01B             0h
+bss      D031F6 D0DD82 D13FD6   AB8Ch
+header   D1A87F D1A882             3h
+
+Label                       Value
+-------------------------   ------
+_os_DisableHomeTextBuffer = D1AA8F
+_os_EnableHomeTextBuffer  = D1AAA1
+_random                   = D1AAB3
+__state                   = D1AFCB
+__frameset0               = D1AB0A
+__imul_b                  = 000158
+__imul_b                  = 000150
+__setflag                 = 000218
+_memset                   = D1AB15
+__icmpzero                = 000138
+__iremu                   = 000170
+__frameset                = D1AB2C
+__findlibload             = D1A999
+__program_icon            = D1A887
+__program_description     = D1A989
+__ccleanup                = D1AA75
+_errno                    = D008DC
+_init                     = D1A882
+_exit                     = D1AA8B
+__exit                    = D1AA64
+__exitsp                  = D1AA64
+__errsp                   = D1AA64
+_doesroomfit              = D1AF3C
+_placeroom                = D1AD6A
+_randroom                 = D1AD53
+_genrooms                 = D1AC73
+_mapgen                   = D1AC65
+_drawmap                  = D1AB88
+_everything               = D1AB5F
+_main                     = D1AB3A
+_map                      = D0899A
+_r                        = D0321A
+_count                    = D03217
+_room_h                   = D03214
+_room_w                   = D03211
+_room_y                   = D0320E
+_room_x                   = D0320B
+_num_rcands               = D03208
+_max_h                    = D03205
+_max_w                    = D03202
+_min_h                    = D1B018
+_min_w                    = D1B015
+_wallcolor                = D1B012
+_floorcolor               = D1B00F
+_treecolor                = D1B00C
+_ymax                     = D1B009
+_ymin                     = D1B006
+_xmax                     = D1B003
+_xmin                     = D1B000
+_offset                   = D1AFFD
+__y                       = D031FF
+_y                        = D031FC
+_x                        = D031F9
+__x                       = D031F6
+_kb_Scan                  = D1AA05
+_gfx_Begin                = D1AA12
+_gfx_End                  = D1AA16
+_gfx_SetColor             = D1AA1A
+_gfx_FillScreen           = D1AA1E
+_gfx_SetPixel             = D1AA22
+_gfx_PrintInt             = D1AA26
+_gfx_SetTextXY            = D1AA2A
+_gfx_SetTextFGColor       = D1AA2E
+_gfx_FillRectangle        = D1AA32
