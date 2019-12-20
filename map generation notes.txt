@@ -1,0 +1,332 @@
+Procedural Generation Algorithm:
+
+-more complex algorithm doesn't neccesarily mean a better map
+referance 
+
+http://journal.stuffwithstuff.com/2014/12/21/rooms-and-mazes/
+
+-more free generation than room blocks (better for smaller tighter maps)
+
+
+////////////////
+OVERVIEW:
+///////////////
+(* means psuedocoded)
+
+*1- generate rooms
+	-don't overlap
+	-decide how many tile between rooms
+	-decide min and max size, and max number of rooms
+	
+*2- generate paths
+	-not just straight
+	-creative tight hallways
+		
+*3- connect paths and rooms together
+	
+4- make more interesting
+    -add shortcuts
+    -remove (or minimize) dead ends
+	
+5- go through rooms and populate with enemies and pots and stuff
+
+
+
+
+
+
+
+
+PSEUDOCODE:
+
+mapgen(){
+    //fill map with walls;
+    genroom()
+    mazeworm()
+    placeflags()
+    carvedoors()
+    carveshortcuts()
+    fillends()
+}
+
+
+
+/////////////////////
+ROOMS
+/////////////////////
+
+genrooms(){ //make random sized rooms and check and place them
+   fmax: maximum failures to place a room
+   rmax: maximum number of rooms 
+   randroom();        
+   do{
+      if placeroom(){
+          rmax--
+      }
+      else {
+          fmax--
+      }
+   }while fmax or rmax are bigger than 0
+}
+
+placeroom(){               //take rooms of random size,see if they fit in all eligible spaces on the map;
+    for (xmin,xmax,x++){        
+        for (ymin,ymax,y++){
+            if doesroomfit(x,y,room_w,room_h) {
+               //add candidate
+            }
+        }
+    }
+    if (no candidates) {
+        return false;
+    }
+    //get random candidate
+    //place room with that candidate's credentials
+    return true;
+}
+
+randroom(){
+    pick width between min and max;
+    pick height between min and max;
+    store size
+}
+
+bool doesroomfit(x,y,w,h){ 
+                             //starts with x,y and w,h from randroom 
+                             //checks whether it will merge with adjacent room;
+                             //include walls in check (at least 1 wall between);
+    for (loop through whole range of room tiles(plus one on each side)) {
+          if (the current tile is walkeable){
+              decrement max h and w(as long as it is above min w & h);
+              return false;
+          }
+    }
+    return true;        
+}
+
+
+
+///////////////////
+MAZE
+///////////////////
+
+//Identify "signature" of tiles surrounding worm
+//signature is used in tunneling and can be used later
+
+//make these arrays global
+carve_sig = {}                                                 //array of desired sigs in hexadecimal (from paper)
+carve_mask = {}                                                //array of corresponding masks in hexadecimal (from paper) 
+dirx = {-1,0,1,0}                                              //left,up,right,down,
+diry = {0,1,0,-1}
+
+mazeworm(){                                                    //carves the maze
+  do{
+     for (xmin to xmax){                                       //cycle through whole map
+        for (ymin to ymax){                                                  
+            if ((is a wall) and (getsig(x,y)==(sig of surrounded by walls))){     //finding worm staring place candidates
+                (add x and y to a list of candidates);         //maybe struct for this
+            }
+        }
+     }   
+    if (candidates exist){
+        random candidate                                       //use candidate struct
+        digworm(c.x,c.y);
+    } 
+  } while(there are still candidates)       
+}
+
+digworm(x,y);
+dx = 0                                                          //change in x for motion;
+dy = 1                                                          //change in y for motion;
+dcand = {0,0,0,0}
+dig = 1;
+drand;
+step = 0;
+    do {
+        set tile at coords to path;
+        if (!(cancarve(x+dx,y+dx)) or (50% chance of random direction change and step is 2){       //force at least 2 steps between random changes in direction
+            step = 0;
+            for I = 0,3
+                dcand[I] = 0;
+                if cancarve(x + dirx[I],y + diry[I]){           //check all 4 directions
+                    dcand[I] = 1;                               //sets candidate list
+                }
+            }
+            if (candidate list is empty){                       //if no candidates, kill current worm
+                dig = 0;
+            }
+            else                                                //if candidates, pick a random candidate
+                dir = 4;
+                do{
+                   drand = randInt(0,3) 
+                    if (dcand(drand) == 1){
+                        dir = drand;
+                    }
+                } while (dir = 4) 
+            }
+        }
+        x = x + dirx(drand)                                    //move worm head to new position
+        y = y + diry(drand)
+        step++;
+    } while (dig != 0)
+}
+
+bool cancarve(x,y){                                               //checks if you can carve at the coordinates 
+    if ((inside bounds) and (is a wall)) {
+        sig = getsig(x,y)
+        for(I=0,I <=(sizeof(carve_sig) / sizeof(carve_sig[0])),I++0) {  //loop through sigs from 0 to last element
+            if bcomp(sig,carve_sig[i],carve_mask[i]){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+int bcomp(sig,match,mask){                                         //bitmask: put a 1 where the x on the chart is (x's don't matter)
+    mask = mask and mask or 0;                                     //if there is a mask, compare against it, if not                  
+    return ((sig [bitwiseOR] mask)==(match [bitwiseOR] mask))      //compare masked sig with matched mask, returns 1 if true or 0 if false
+}
+
+int getsig(x,y){                                                   //store signature of tiles as a binary bitmap
+    int sig = 0;                                                   //sig
+    int digit;                                                     //what digit to add
+
+    for (cycle through 8 surrounding tiles) {                      //cycle through 4 cardinal directions, then the 4 corners (makes the corner bitmask easier)
+        
+        if (the tile is walkable) {
+            digit = 0;                          
+        }             
+        else {
+            digit = 1; 
+        }
+        sig = (sig [bitwiseOR] shiftleft(digit,8-I)))      //first bit written (at I=0) will be the left bit (4 ca)
+    }     
+    return sig;                                            //passes sig outside of the function
+}
+
+
+///////////////////
+DOORS (KINDA)
+///////////////////
+
+placeflags(){                                                 //go through and flag tiles with a number in a map sized array
+    currentflag=1
+    flags{}=0                                                 //initialize map array with zero's
+        for (xmin to xmax){                                   //cycle through whole map
+           for (ymin to ymax){
+               if (tile is walkable(x,y) and flags[x,y]==0 {
+                    growflag(x,y,currentflag);
+                    currentflag++
+               }
+           }
+        } 
+}
+
+growflag(x,y,flag){                                     //fill areas with flags
+    cand{}                                              //current candidate struct thingy
+    candnew={{x,y}}                                     //candidate struct thingy being created                                    
+    do{
+        candnew={}                                      //reset candnew
+        for (all of cand array,I++){
+            flags[cand[I].x,cand[I].y]=flag             //set current flag
+            for (all 4 directions,II++){                //search through all neighbors 
+                dx = cand[I].x+dirx[II];
+                dy = cand[I].y+diry[II];
+                if (iswalkable(dx,dy) and (flags[dx,dy] != flag){
+                    //add a new entry of {dx,dy} to candnew
+                }
+            }
+        }    
+        cand = candnew;                                 //store the new array to the "current" one                 
+    }while (cand is not empty)
+}
+
+carvedoors(){
+x1,y1,f1
+x2,y2,f2
+found
+int sig=0
+    do{
+        doorcand={{x,y,f1}}                             //door candidates array(or struct)
+        for (xmin to xmax){                             //go through entire map
+            for (ymin to ymax){
+                if (is not walkeable(x,y)){
+                    sig=getsig(x,y)
+                    found=false;
+                    if bcomp(sig,(sig of wall up and down hex),(corresponding mask){
+                        x1=x-1,y1=y                     //set flag test coords
+                        x2=x+1,y2=y
+                        found=true;
+                    }
+                    else if bcomp(sig,(sig of wall both sides hex),(corresponding mask){
+                        x1=x,y1=y-1                     //set flag test coords
+                        x2=x,y2=y+1
+                        found=true;
+                    }
+                    f1 = flags[x1,y1]                   //get the flag on either side of the wall
+                    f2 = flags[x2,y2]
+                    if (found==true) and (f1!=f2){
+                        //add x,y to doorcand array
+                    }
+                }
+            }
+        }
+        if (doorcand is not empty) {
+            //get random entry in doorcand
+            //set tile at doorcand[].x,doorcand[].y to floor
+            growflag(doorcand[].x,doorcand[].y,doorcand[].f1)   //merge rooms
+            
+        }
+    }while (doorcand is not empty)
+}
+
+carveshortcut(){
+x1,y1
+x2,y2
+found
+int sig=0
+    do{
+        shortcand={{x,y}}                            //shortcuts candidates array(or struct)
+        for (xmin to xmax){                             //go through entire map
+            for (ymin to ymax){
+                if (is not walkeable(x,y)){
+                    sig=getsig(x,y)
+                    found=false;
+                    if bcomp(sig,(sig of wall up and down hex),(corresponding mask){
+                        x1=x-1,y1=y                     //set flag test coords
+                        x2=x+1,y2=y
+                        found=true;
+                    }
+                    else if bcomp(sig,(sig of wall both sides hex),(corresponding mask){
+                        x1=x,y1=y-1                     //set flag test coords
+                        x2=x,y2=y+1
+                        found=true;
+                    }
+                    if (found=true) {                        //will only add a shortcut if one side of wall is a certain walkable distance from other side
+                        calcdist(x1,y1)                      //from pathfinding stuff 
+                        if (distmap[x2,y2]>5) {              //from pathfinding stuff
+                            //add x,y to shortcand
+                        }
+                    }
+                }
+            }
+        }
+        if (shortcand is not empty) {
+            //get random entry in shortcand
+            //set tile at shortcand[].x,shortcand[].y to floor
+        }
+    }while (shortcand is not empty)
+}
+
+
+
+///////////////////
+PRETTY-IFYING
+///////////////////
+
+fillends(){
+    //do the candidate thingy like door function
+    //test for dead end bitmap
+    //fill in the middle
+}

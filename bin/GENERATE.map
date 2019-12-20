@@ -1,0 +1,72 @@
+Segment  Base   Top    High   Length
+-------- ------ ------ ------ -------
+icon     D1A882 D1A999           117h
+launcher D1A999 D1A9F1            58h
+libs     D1A9F1 D1AA2A            39h
+startup  D1AA2A D1AA69            3Fh
+cleanup  D1AA69 D1AA7D            14h
+exit     D1AA7D D1AA83             6h
+code     D1AA83 D1AF68           4E5h
+data     D1AF68 D1AFBE            56h
+strsect  D1AFBE D1AFC0             2h
+text     D1AFC0 D1AFC0             0h
+bss      D031F6 D05533 D13FD6   233Dh
+header   D1A87F D1A882             3h
+
+Label                       Value
+-------------------------   ------
+_os_DisableHomeTextBuffer = D1AA83
+_os_EnableHomeTextBuffer  = D1AA95
+_random                   = D1AAA7
+__state                   = D1AF68
+__imul_b                  = 000158
+__imul_b                  = 000150
+__setflag                 = 000218
+__icmpzero                = 000138
+__iremu                   = 000170
+__frameset                = D1AAFE
+__findlibload             = D1A999
+__program_icon            = D1A887
+__program_description     = D1A989
+__ccleanup                = D1AA69
+_errno                    = D008DC
+_init                     = D1A882
+_exit                     = D1AA7F
+__exit                    = D1AA58
+__exitsp                  = D1AA58
+__errsp                   = D1AA58
+_doesroomfit              = D1AEBD
+_placeroom                = D1AD07
+_randroom                 = D1ACB6
+_genrooms                 = D1AC38
+_mapgen                   = D1AC33
+_drawmap                  = D1AB29
+_main                     = D1AB0C
+_map                      = D04E2B
+_r                        = D0320B
+_room_h                   = D03208
+_room_w                   = D03205
+_room_y                   = D03202
+_room_x                   = D031FF
+_num_rcands               = D031FC
+_max_h                    = D1AFBB
+_max_w                    = D1AFB8
+_min_h                    = D1AFB5
+_min_w                    = D1AFB2
+_wallcolor                = D1AFAF
+_floorcolor               = D1AFAC
+_treecolor                = D1AFA9
+_ymax                     = D1AFA6
+_ymin                     = D1AFA3
+_xmax                     = D1AFA0
+_xmin                     = D1AF9D
+_offset                   = D1AF9A
+__y                       = D031F9
+__x                       = D031F6
+_kb_Scan                  = D1AA05
+_gfx_Begin                = D1AA12
+_gfx_End                  = D1AA16
+_gfx_SetColor             = D1AA1A
+_gfx_FillScreen           = D1AA1E
+_gfx_PrintStringXY        = D1AA22
+_gfx_SetTextXY            = D1AA26
