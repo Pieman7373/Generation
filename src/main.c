@@ -53,13 +53,13 @@ int room_y;
 int room_w;
 int room_h;
 
-room_t r[600];
+room_t r[7160];
 
 int map[40][179];
 
 void main(void) {
 	gfx_Begin();
-	
+		gfx_FillScreen(0x00);
 	mapgen();
 	drawmap();
 	
@@ -72,7 +72,6 @@ void main(void) {
 
 /* Put other functions here */
 void drawmap() {
-	gfx_FillScreen(0x00);
 	for (_x=xmin;_x<xmax;_x++){
 		for (_y=ymin;_y<ymax;_y++){
 			if (map[_x][_y] == 1){

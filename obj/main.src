@@ -57,7 +57,7 @@ _room_w:
 _room_h:
 	DS	3
 _r:
-	DS	7200
+	DS	85920
 _map:
 	DS	21480
 ;    1	/*
@@ -115,7 +115,7 @@ _map:
 ;   53	int room_w;
 ;   54	int room_h;
 ;   55	
-;   56	room_t r[600];
+;   56	room_t r[7160];
 ;   57	
 ;   58	int map[40][179];
 	SEGMENT CODE
@@ -124,7 +124,11 @@ _map:
 _main:
 ;   61		gfx_Begin();
 	CALL	_gfx_Begin
-;   62		
+;   62			gfx_FillScreen(0x00);
+	LD	BC,0
+	PUSH	BC
+	CALL	_gfx_FillScreen
+	POP	BC
 ;   63		mapgen();
 	CALL	_mapgen
 ;   64		drawmap();
@@ -151,6 +155,7 @@ L_0:
 ;_kb_Scan                            IMPORT  -----   function
 ;_drawmap                            IMPORT  -----   function
 ;_mapgen                             IMPORT  -----   function
+;_gfx_FillScreen                     IMPORT  -----   function
 ;_gfx_Begin                          IMPORT  -----   function
 
 
@@ -164,22 +169,17 @@ L_0:
 _drawmap:
 	LD	HL,-6
 	CALL	__frameset
-;   75		gfx_FillScreen(0x00);
-	LD	BC,0
-	PUSH	BC
-	CALL	_gfx_FillScreen
-	POP	BC
-;   76		for (_x=xmin;_x<xmax;_x++){
+;   75		for (_x=xmin;_x<xmax;_x++){
 	LD	BC,(_xmin)
 	LD	(__x),BC
 	JR	L_15
 L_13:
-;   77			for (_y=ymin;_y<ymax;_y++){
+;   76			for (_y=ymin;_y<ymax;_y++){
 	LD	BC,(_ymin)
 	LD	(__y),BC
 	JR	L_12
 L_10:
-;   78				if (map[_x][_y] == 1){
+;   77				if (map[_x][_y] == 1){
 	LD	HL,(__x)
 	LD	BC,537
 	CALL	__imulu
@@ -198,31 +198,31 @@ L_10:
 	LD	BC,1
 	SBC	HL,BC
 	JR	NZ,L_8
-;   79					gfx_SetColor(wallcolor);
+;   78					gfx_SetColor(wallcolor);
 	LD	A,(_wallcolor)
 	LD	C,A
 	LD	B,0
 	PUSH	BC
 	CALL	_gfx_SetColor
 	POP	BC
-;   80				}
-;   81				else if (map[_x][_y] == 0){
+;   79				}
+;   80				else if (map[_x][_y] == 0){
 	JR	L_9
 L_8:
 	LD	HL,(IX+-3)
 	LD	HL,(HL)
 	CALL	__icmpzero
 	JR	NZ,L_9
-;   82					gfx_SetColor(floorcolor);
+;   81					gfx_SetColor(floorcolor);
 	LD	A,(_floorcolor)
 	LD	C,A
 	LD	B,0
 	PUSH	BC
 	CALL	_gfx_SetColor
 	POP	BC
-;   83				}
+;   82				}
 L_9:
-;   84				gfx_SetPixel(_x+offset,_y+offset);
+;   83				gfx_SetPixel(_x+offset,_y+offset);
 	LD	A,(__y)
 	LD	B,A
 	LD	A,(_offset)
@@ -242,7 +242,7 @@ L_9:
 	LD	BC,(__y)
 	INC	BC
 	LD	(__y),BC
-;   85			}
+;   84			}
 L_12:
 	LD	BC,(_ymax)
 	LD	HL,(__y)
@@ -252,7 +252,7 @@ L_12:
 	LD	BC,(__x)
 	INC	BC
 	LD	(__x),BC
-;   86		}
+;   85		}
 L_15:
 	LD	BC,(_xmax)
 	LD	HL,(__x)
@@ -260,7 +260,7 @@ L_15:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_13
-;   87	}
+;   86	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -280,7 +280,6 @@ L_15:
 ;_ymin                               STATIC      3   variable
 ;__x                                 STATIC      3   variable
 ;_xmin                               STATIC      3   variable
-;_gfx_FillScreen                     IMPORT  -----   function
 ;G_0                                   IX-6      3   variable
 ;G_1                                   IX-3      3   variable
 
@@ -289,14 +288,14 @@ L_15:
 ;       Spill Code: 0 (instruction)
 
 
-;   88	
-;   89	void mapgen() {
+;   87	
+;   88	void mapgen() {
 _mapgen:
-;   90		genrooms();
+;   89		genrooms();
 	CALL	_genrooms
-;   91		//mazeworm();
-;   92		//placeflags();
-;   93	}
+;   90		//mazeworm();
+;   91		//placeflags();
+;   92	}
 	RET	
 
 
@@ -309,21 +308,21 @@ _mapgen:
 ;       Spill Code: 0 (instruction)
 
 
-;   94	
-;   95	void genrooms() {
+;   93	
+;   94	void genrooms() {
 _genrooms:
 	LD	HL,-6
 	CALL	__frameset
-;   96		int fmax=10;
+;   95		int fmax=10;
 	LD	BC,10
 	LD	(IX+-3),BC
-;   97		int rmax=10;
+;   96		int rmax=10;
 	LD	(IX+-6),BC
-;   98		max_w = 10;
+;   97		max_w = 10;
 	LD	(_max_w),BC
-;   99		max_h = 10;
+;   98		max_h = 10;
 	LD	(_max_h),BC
-;  100		randroom(min_w,max_w,min_h,max_h);
+;   99		randroom(min_w,max_w,min_h,max_h);
 	PUSH	BC
 	LD	BC,(_min_h)
 	PUSH	BC
@@ -336,9 +335,9 @@ _genrooms:
 	POP	BC
 	POP	BC
 	POP	BC
-;  101		do {
+;  100		do {
 L_23:
-;  102			if (placeroom(room_w, room_h)) {
+;  101			if (placeroom(room_w, room_h)) {
 	LD	BC,(_room_h)
 	PUSH	BC
 	LD	BC,(_room_w)
@@ -348,20 +347,20 @@ L_23:
 	POP	BC
 	OR	A,A
 	JR	Z,L_21
-;  103				rmax--;
+;  102				rmax--;
 	LD	BC,(IX+-6)
 	DEC	BC
 	LD	(IX+-6),BC
-;  104			} 
-;  105			else {
+;  103			} 
+;  104			else {
 	JR	L_24
 L_21:
-;  106				fmax--;
+;  105				fmax--;
 	LD	BC,(IX+-3)
 	DEC	BC
 	LD	(IX+-3),BC
-;  107			}
-;  108		} while (fmax > 0 && rmax > 0);
+;  106			}
+;  107		} while (fmax > 0 && rmax > 0);
 L_24:
 	LD	BC,(IX+-3)
 	OR	A,A
@@ -376,7 +375,7 @@ L_24:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_23
-;  109	}
+;  108	}
 L_25:
 	LD	SP,IX
 	POP	IX
@@ -401,12 +400,12 @@ L_25:
 ;       Spill Code: 0 (instruction)
 
 
-;  110	
-;  111	void randroom(int mn_w,int mx_w,int mn_h,int mx_h) {
+;  109	
+;  110	void randroom(int mn_w,int mx_w,int mn_h,int mx_h) {
 _randroom:
 	LD	HL,-6
 	CALL	__frameset
-;  112		room_w = randInt(mn_w,mx_w);
+;  111		room_w = randInt(mn_w,mx_w);
 	CALL	_random
 	LD	(IX+-3),HL
 	LD	HL,(IX+9)
@@ -420,7 +419,7 @@ _randroom:
 	CALL	__iremu
 	ADD	HL,DE
 	LD	(_room_w),HL
-;  113		room_h = randInt(mn_h,mx_h);
+;  112		room_h = randInt(mn_h,mx_h);
 	CALL	_random
 	LD	(IX+-6),HL
 	LD	HL,(IX+15)
@@ -434,7 +433,7 @@ _randroom:
 	CALL	__iremu
 	ADD	HL,DE
 	LD	(_room_h),HL
-;  114	}
+;  113	}
 	LD	SP,IX
 	POP	IX
 	RET	
@@ -455,32 +454,32 @@ _randroom:
 ;       Spill Code: 0 (instruction)
 
 
-;  115	
-;  116	bool placeroom(int w,int h) {
+;  114	
+;  115	bool placeroom(int w,int h) {
 _placeroom:
 	LD	HL,-45
 	CALL	__frameset
-;  117		int r_x;
-;  118		int r_y;
-;  119		int R;
-;  120		int rp_x;
-;  121		int rp_y;
-;  122		int mx;
-;  123		int my;
-;  124		num_rcands = 0;
+;  116		int r_x;
+;  117		int r_y;
+;  118		int R;
+;  119		int rp_x;
+;  120		int rp_y;
+;  121		int mx;
+;  122		int my;
+;  123		num_rcands = 0;
 	LD	BC,0
 	LD	(_num_rcands),BC
-;  125		for (r_x=xmin;r_x<(xmax-w);r_x++){
+;  124		for (r_x=xmin;r_x<(xmax-w);r_x++){
 	LD	BC,(_xmin)
 	LD	(IX+-9),BC
 	JR	L_36
 L_34:
-;  126			for (r_y=ymin;r_y<(ymax-h);r_y++){
+;  125			for (r_y=ymin;r_y<(ymax-h);r_y++){
 	LD	BC,(_ymin)
 	LD	(IX+-6),BC
 	JR	L_33
 L_31:
-;  127				if (doesroomfit(r_x,r_y,w,h)) {
+;  126				if (doesroomfit(r_x,r_y,w,h)) {
 	LD	BC,(IX+9)
 	PUSH	BC
 	LD	BC,(IX+6)
@@ -496,7 +495,7 @@ L_31:
 	POP	BC
 	OR	A,A
 	JR	Z,L_32
-;  128					r[num_rcands].x=r_x;
+;  127					r[num_rcands].x=r_x;
 	LD	HL,(_num_rcands)
 	LD	A,12
 	CALL	__imul_b
@@ -506,21 +505,21 @@ L_31:
 	LD	BC,(IX+-9)
 	LD	IY,(IX+-36)
 	LD	(IY+0),BC
-;  129					r[num_rcands].y=r_y;
+;  128					r[num_rcands].y=r_y;
 	LD	BC,(IX+-6)
 	LD	(IY+3),BC
-;  130					r[num_rcands].w=w;
+;  129					r[num_rcands].w=w;
 	LD	BC,(IX+6)
 	LD	(IY+6),BC
-;  131					r[num_rcands].h=h;
+;  130					r[num_rcands].h=h;
 	LD	BC,(IX+9)
 	LD	(IY+9),BC
-;  132					num_rcands++;
+;  131					num_rcands++;
 	LD	BC,(_num_rcands)
 	INC	BC
 	LD	(_num_rcands),BC
-;  133				}
-;  134			}
+;  132				}
+;  133			}
 L_32:
 	LD	BC,(IX+-6)
 	INC	BC
@@ -538,7 +537,7 @@ L_33:
 	LD	BC,(IX+-9)
 	INC	BC
 	LD	(IX+-9),BC
-;  135		}
+;  134		}
 L_36:
 	LD	HL,(_xmax)
 	LD	BC,(IX+6)
@@ -550,22 +549,22 @@ L_36:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_34
-;  136		if (num_rcands==0){
+;  135		if (num_rcands==0){
 	LD	HL,(_num_rcands)
 	CALL	__icmpzero
 	JR	NZ,L_39
-;  137			return false;
+;  136			return false;
 	XOR	A,A
 	JR	L_49
-;  138		}
+;  137		}
 L_39:
-;  139		R=randInt(0,num_rcands);
+;  138		R=randInt(0,num_rcands);
 	CALL	_random
 	LD	BC,(_num_rcands)
 	INC	BC
 	CALL	__iremu
 	LD	(IX+-30),HL
-;  140		for (rp_x=r[R].x;rp_x<(r[R].x+r[R].w);rp_x++){
+;  139		for (rp_x=r[R].x;rp_x<(r[R].x+r[R].w);rp_x++){
 	LD	A,12
 	CALL	__imul_b
 	LD	(IX+-21),HL
@@ -576,7 +575,7 @@ L_39:
 	LD	(IX+-15),BC
 	JR	L_47
 L_45:
-;  141			for (rp_y=r[R].y;rp_y<(r[R].y+r[R].h);rp_y++){
+;  140			for (rp_y=r[R].y;rp_y<(r[R].y+r[R].h);rp_y++){
 	LD	BC,(IX+-12)
 	LD	(IX+-24),BC
 	LD	HL,(IX+-12)
@@ -587,7 +586,7 @@ L_45:
 	LD	(IX+-18),BC
 	JR	L_44
 L_42:
-;  142				mx=r[R].x;
+;  141				mx=r[R].x;
 	LD	BC,(IX+-3)
 	LD	(IX+-24),BC
 	LD	HL,(IX+-3)
@@ -597,10 +596,10 @@ L_42:
 	LD	IY,(IX+-39)
 	LD	BC,(IY+0)
 	LD	(IX+-33),BC
-;  143				my=r[R].y;
+;  142				my=r[R].y;
 	LD	BC,(IY+3)
 	LD	(IX+-27),BC
-;  144				map[mx][my]=0;
+;  143				map[mx][my]=0;
 	LD	HL,(IX+-33)
 	LD	BC,537
 	CALL	__imulu
@@ -617,7 +616,7 @@ L_42:
 	LD	BC,(IX+-18)
 	INC	BC
 	LD	(IX+-18),BC
-;  145			}
+;  144			}
 L_44:
 	LD	BC,(IX+-24)
 	LD	(IX+-3),BC
@@ -639,7 +638,7 @@ L_44:
 	LD	BC,(IX+-15)
 	INC	BC
 	LD	(IX+-15),BC
-;  146		}
+;  145		}
 L_47:
 	LD	BC,(IX+-21)
 	LD	(IX+-12),BC
@@ -657,9 +656,9 @@ L_47:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_45
-;  147		return true;
+;  146		return true;
 	LD	A,1
-;  148	}
+;  147	}
 L_49:
 	LD	SP,IX
 	POP	IX
@@ -672,7 +671,7 @@ L_49:
 ;_random                             IMPORT  -----   function
 ;_xmax                               STATIC      3   variable
 ;_ymax                               STATIC      3   variable
-;_r                                  STATIC   7200   variable
+;_r                                  STATIC  85920   variable
 ;_doesroomfit                        IMPORT  -----   function
 ;_ymin                               STATIC      3   variable
 ;_xmin                               STATIC      3   variable
@@ -696,26 +695,26 @@ L_49:
 ;       Spill Code: 0 (instruction)
 
 
-;  149	
-;  150	bool doesroomfit(int x,int y,int w,int h) {
+;  148	
+;  149	bool doesroomfit(int x,int y,int w,int h) {
 _doesroomfit:
 	LD	HL,-6
 	CALL	__frameset
-;  151		int r_x;
-;  152		int r_y;
-;  153		for (r_x=(x-1);r_x<x+(w+1);r_x++){
+;  150		int r_x;
+;  151		int r_y;
+;  152		for (r_x=(x-1);r_x<x+(w+1);r_x++){
 	LD	BC,(IX+6)
 	DEC	BC
 	LD	(IX+-3),BC
 	JR	L_63
 L_61:
-;  154			for (r_y=(y-1);r_y<y+(h+1);r_y++){
+;  153			for (r_y=(y-1);r_y<y+(h+1);r_y++){
 	LD	BC,(IX+9)
 	DEC	BC
 	LD	(IX+-6),BC
 	JR	L_60
 L_58:
-;  155				if (map[r_x][r_y]==0){
+;  154				if (map[r_x][r_y]==0){
 	LD	BC,537
 	LD	HL,(IX+-3)
 	CALL	__imulu
@@ -730,32 +729,32 @@ L_58:
 	LD	HL,(HL)
 	CALL	__icmpzero
 	JR	NZ,L_59
-;  156					if (w>=h) {
+;  155					if (w>=h) {
 	LD	BC,(IX+15)
 	LD	HL,(IX+12)
 	OR	A,A
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_55
-;  157						max_w--;
+;  156						max_w--;
 	LD	BC,(_max_w)
 	DEC	BC
 	LD	(_max_w),BC
-;  158					}
-;  159					else {
+;  157					}
+;  158					else {
 	JR	L_56
 L_55:
-;  160						max_h--;
+;  159						max_h--;
 	LD	BC,(_max_h)
 	DEC	BC
 	LD	(_max_h),BC
-;  161					}
+;  160					}
 L_56:
-;  162					return false;
+;  161					return false;
 	XOR	A,A
 	JR	L_65
-;  163				}
-;  164			}
+;  162				}
+;  163			}
 L_59:
 	LD	BC,(IX+-6)
 	INC	BC
@@ -774,7 +773,7 @@ L_60:
 	LD	BC,(IX+-3)
 	INC	BC
 	LD	(IX+-3),BC
-;  165		}
+;  164		}
 L_63:
 	LD	HL,(IX+12)
 	INC	HL
@@ -786,7 +785,7 @@ L_63:
 	SBC	HL,BC
 	CALL	__setflag
 	JP	M,L_61
-;  166		return true;
+;  165		return true;
 	LD	A,1
 L_65:
 	LD	SP,IX
