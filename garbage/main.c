@@ -64,8 +64,6 @@ int map[40][179];
 void main(void) {
 	gfx_Begin();
 	
-	everything();
-	
     do {
 		kb_Scan();
 		if (kb_Data[6] & kb_Enter){
