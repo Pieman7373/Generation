@@ -23,52 +23,63 @@
 
 #include "structs.h"
 
+
+
+
+
 /* Put your function prototypes here */
 void everything(void);
-void mapgen(void);
-void genrooms(void);
-void randroom(int,int,int,int);
-bool placeroom(int,int);
-bool doesroomfit(int,int,int,int);
-void mazeworm(void);
 void drawmap(void);
+void resetmap(int);
+void genroom(void);
+void randroom();
+bool doesroomfit(int,int,int,int);
+bool placeroom(int,int);
+
 
 /* Put all your globals here */
-int _x;
-int x;
-int y;
-int _y;
-int offset = 10;
-int xmin = 0;
-int xmax = 32;
-int ymin = 0;
-int ymax = 175;
-int treecolor = 0x03;
-int floorcolor = 0xFF;
+
+//colors
 int wallcolor = 0xE0;
-int min_w = 10;
-int min_h = 10;
-int max_w = 10;
-int max_h = 10;
-//int max_w;  //30 in the final
-//int max_h;  //50 in final
-int num_rcands;
-int room_x;
-int room_y;
-int room_w;
-int room_h;
-int count;
+int floorcolor = 0x27;
 
-room_t r[5600];
+//drawnmap
+int startx = 20; //20
+int starty = 10; //10
+int bsize = 4; //5
 
-int map[40][179];
+//map data
+int map[80][80];
+int mapw = 80;
+int maph = 80;
+int mapx;
+int mapy;
+
+//room variables
+int minside = 5; //3
+int maxside = 20; //15
+int maxarea = 100;
+int roomx;
+int roomy;
+int roomw;
+int roomh;
+
+
+
+/*RAND THING
+
+	rand() % (max_number + 1 - minimum_number) + minimum_number
+
+*/
 
 void main(void) {
 	gfx_Begin();
-	
+	gfx_FillScreen(0x00);
     do {
 		kb_Scan();
 		if (kb_Data[6] & kb_Enter){
+			gfx_FillScreen(0x00);
+			resetmap(0);
 			everything();
 		}
 	} while (!(kb_Data[6] & kb_Clear));
@@ -76,132 +87,136 @@ void main(void) {
     gfx_End();
 }
 
-void everything(void){
-	gfx_FillScreen(0x00);
-	memset(map, 0, 7160);
+
+void everything() {	
 	
-	/* random test
-	for(x=xmin;x<xmax;x++){
-		for(y=ymin;y<ymax;y++){
-			if (randInt(0,4) == 2){
-				map[x][y] = 1;
-			}
-		}
-	}
-	*/
-	
-	mapgen();
+	genroom();
 	drawmap();
+	
 }
 
-/* Put other functions here */
 void drawmap() {
-	for (_x=xmin;_x<xmax;_x++){
-		for (_y=ymin;_y<ymax;_y++){
-			if (map[_x][_y] == 0){
-				gfx_SetColor(wallcolor);
+	for( mapx=0; mapx<mapw; mapx++){
+		for( mapy=0; mapy<maph; mapy++){
+			
+			switch (map[mapx][mapy]){
+				case 0:
+					gfx_SetColor(wallcolor);
+					break;
+				case 1:
+					gfx_SetColor(floorcolor);
+					break;
+				default:
+					gfx_SetColor(0x00);
+					break;
 			}
-			if (map[_x][_y] == 1){
-				gfx_SetColor(floorcolor);
-			}
-			gfx_SetPixel(_x+offset,_y+offset);
+		
+			gfx_FillRectangle((startx+(bsize*mapx)),(starty+(bsize*mapy)),bsize,bsize);
+			
+			
+			/* GRID VISUALIZATION
+			gfx_SetColor(0x74);
+			gfx_Rectangle((startx+(bsize*mapx)),(starty+(bsize*mapy)),bsize,bsize);
+			*/
 		}
 	}
 }
 
-void mapgen() {
-	count=0;
-	genrooms();
-	//mazeworm();
-	//placeflags();
+void genroom() {
+int rmax = 15;
+	
+	do { //make rooms until max is reached
+	
+		//picks random room size
+		randroom();
+	
+		//checks if room fits or is intersecting any other room, then places	
+		if (placeroom(roomw,roomh)) {
+			rmax-=1;
+		}
+		
+	} while (rmax);
 }
 
-void genrooms() {
-	int fmax=5;
-	int rmax=30;
+void randroom(){
+	//get new number  if below minimum
+	//do {
+	//	roomw = (rand() % maxside+1);
+	//} while (roomw<minside);
+	roomw = randInt(minside,maxside);
+	
+	//get new number if below minimum
+	//do {
+	//	roomh = (rand() % maxside+1);
+	//} while (roomh<minside);
+	roomh = randInt(minside,maxside);
+}
 
+
+
+bool placeroom(width,height){
+	int countx;
+	int county;
+	int placex;
+	int placey;
+	int fmax = 10;
+	
+	/* Random Room Coords*/
+	//do {
+	//	placex = (rand() % 48);
+	//} while ((placex+width>=mapw-1) || (placex == 0));
+	placex = randInt(1, mapw-width);
+	
+	//do {
+	//	placey = (rand() % 48);
+	//} while ((placey+height>=maph-1) || (placey == 0));
+	placey = randInt(1, maph-height);
 	
 	do {
-		
-		randroom(min_w,max_w,min_h,max_h);	
-		
-		count++;
-		gfx_SetColor(0x00);
-		gfx_FillRectangle(150,150,100,60);
-		gfx_SetTextFGColor(gfx_green);
-		gfx_SetTextXY(150,150);
-		gfx_PrintInt(count,8);
-
-		
-		if (placeroom(room_w, room_h)) {
-			rmax--;
-		} 
-		else {
-			fmax--;
+		if (doesroomfit(placex,placey,width,height)){  //check if room fits
+			/*write room to map*/
+			for( countx = placex; countx < placex+width; countx++){
+				for( county = placey; county < placey+height; county++){
+					map[countx][county] = 1;
+				}
+			}
+			return true;
 		}
-	} while (fmax > 0 && rmax > 0);
+		                         // if room doesn't fit, decrease size
+		fmax-=1;
+		if (width > maxside) {
+			width-=1;
+		}
+		if (height > maxside) {
+			height-=1;
+		}
+
+			
+	} while (fmax);
+	
+	return false;              //after some failed tries, it falls through
+	
 }
 
-void randroom(int mn_w,int mx_w,int mn_h,int mx_h) {
-	//room_w = 10;
-	//room_h = 10;
-	room_w = randInt(mn_w,mx_w);
-	room_h = randInt(mn_h,mx_h);
-}
-
-bool placeroom(int w,int h) {
-	int r_x;
-	int r_y;
-	int R;
-	int rp_x;
-	int rp_y;
-	int mx;
-	int my;
-	num_rcands = 0;
-	for (r_x=xmin;r_x<(xmax-w);r_x++){
-		for (r_y=ymin;r_y<(ymax-h);r_y++){
-			if (doesroomfit(r_x,r_y,w,h)) {
-				r[num_rcands].x = r_x;
-				r[num_rcands].y = r_y;
-				r[num_rcands].w = w;
-				r[num_rcands].h = h;
-				num_rcands++;
+bool doesroomfit(x,y,w,h){
+	int checkx;
+	int checky;
+		
+		for (checkx = x-1; checkx <= x+w+1; checkx++){
+			for (checky = y-1; checky <= y+h+1; checky++){
+				if (map[checkx][checky]!=0) {
+					return false;
+				}
 			}
 		}
-	}
-	if (num_rcands==0){
-		return false;
-	}
-	R = randInt(0,num_rcands);
-	for (rp_x=r[R].x;rp_x<(r[R].x+r[R].w);rp_x++){
-		for (rp_y=r[R].y;rp_y<(r[R].y+r[R].h);rp_y++){
-			mx=r[R].x;
-			my=r[R].y;
-			map[mx][my]=1;
-			
-			gfx_SetTextXY(150,158);
-			gfx_PrintInt(r[R].x,3);
-			gfx_SetTextXY(150,166);
-			gfx_PrintInt(r[R].y,3);
-			gfx_SetTextXY(150,174);
-			gfx_PrintInt(r[R].w,3);
-			gfx_SetTextXY(150,182);
-			gfx_PrintInt(r[R].h,3);
-			
-		}
-	}
+		
 	return true;
 }
 
-bool doesroomfit(int x,int y,int w,int h) {
-	int r_x;
-	int r_y;
-	for (r_x=(x-5);r_x<x+(w+5);r_x++){
-		for (r_y=(y-5);r_y<y+(h+5);r_y++){
-			if (map[r_x][r_y]==1){
-				return false;
-			}
+void resetmap(value){
+	for( mapx=0; mapx<mapw; mapx++){
+		for( mapy=0; mapy<maph; mapy++){
+			map[mapx][mapy] = value;
 		}
 	}
-	return true;
 }
