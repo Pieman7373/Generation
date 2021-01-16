@@ -6,17 +6,17 @@ libs     D1A9F1 D1AA26            35h
 startup  D1AA26 D1AA65            3Fh
 cleanup  D1AA65 D1AA79            14h
 exit     D1AA79 D1AA7F             6h
-code     D1AA7F D1AEE9           46Ah
-data     D1AEE9 D1AF39            50h
-strsect  D1AF39 D1AF39             0h
-text     D1AF39 D1AF39             0h
-bss      D031F6 D07D08 D13FD6   4B12h
+code     D1AA7F D1AF00           481h
+data     D1AF00 D1AF53            53h
+strsect  D1AF53 D1AF53             0h
+text     D1AF53 D1AF53             0h
+bss      D031F6 D0A732 D13FD6   753Ch
 header   D1A87F D1A882             3h
 
 Label                       Value
 -------------------------   ------
 _random                   = D1AA7F
-__state                   = D1AEE9
+__state                   = D1AF00
 _os_DisableHomeTextBuffer = D1AAD6
 _os_EnableHomeTextBuffer  = D1AAE8
 __imul_b                  = 000158
@@ -38,31 +38,29 @@ _exit                     = D1AA7B
 __exit                    = D1AA54
 __exitsp                  = D1AA54
 __errsp                   = D1AA54
-_resetmap                 = D1AE6D
-_doesroomfit              = D1ADEF
-_placeroom                = D1ACD9
-_randroom                 = D1AC7E
-_genroom                  = D1AC41
+_resetmap                 = D1AE82
+_doesroomfit              = D1AE02
+_placeroom                = D1ACCC
+_genroom                  = D1AC43
 _drawmap                  = D1AB5B
 _everything               = D1AB52
 _main                     = D1AB13
-_roomh                    = D07D05
-_roomw                    = D07D02
-_roomy                    = D07CFF
-_roomx                    = D07CFC
-_maxarea                  = D1AF36
-_maxside                  = D1AF33
-_minside                  = D1AF30
-_mapy                     = D07CF9
-_mapx                     = D07CF6
-_maph                     = D1AF2D
-_mapw                     = D1AF2A
+_roomy                    = D0A72F
+_roomx                    = D0A72C
+_maxh                     = D1AF50
+_maxw                     = D1AF4D
+_minh                     = D1AF4A
+_minw                     = D1AF47
+_mapy                     = D0A729
+_mapx                     = D0A726
+_maph                     = D1AF44
+_mapw                     = D1AF41
 _map                      = D031F6
-_bsize                    = D1AF27
-_starty                   = D1AF24
-_startx                   = D1AF21
-_floorcolor               = D1AF1E
-_wallcolor                = D1AF1B
+_bsize                    = D1AF3E
+_starty                   = D1AF3B
+_startx                   = D1AF38
+_floorcolor               = D1AF35
+_wallcolor                = D1AF32
 _kb_Scan                  = D1AA05
 _gfx_Begin                = D1AA12
 _gfx_End                  = D1AA16

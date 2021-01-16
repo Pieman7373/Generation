@@ -32,7 +32,7 @@ void everything(void);
 void drawmap(void);
 void resetmap(int);
 void genroom(void);
-void randroom();
+//void randroom();
 bool doesroomfit(int,int,int,int);
 bool placeroom(int,int);
 
@@ -46,25 +46,22 @@ int floorcolor = 0x27;
 //drawnmap
 int startx = 20; //20
 int starty = 10; //10
-int bsize = 4; //5
+int bsize = 2; //5
 
-//map data
-int map[80][80];
-int mapw = 80;
-int maph = 80;
+//map da	ta
+int map[100][100];
+int mapw = 100;
+int maph = 100;
 int mapx;
 int mapy;
 
 //room variables
-int minside = 5; //3
-int maxside = 20; //15
-int maxarea = 100;
+int minw = 5; //3
+int minh = 5;
+int maxw = 30; //15
+int maxh = 30;
 int roomx;
 int roomy;
-int roomw;
-int roomh;
-
-
 
 /*RAND THING
 
@@ -123,35 +120,35 @@ void drawmap() {
 }
 
 void genroom() {
-int rmax = 15;
+int rmax = 25;
+
 	
 	do { //make rooms until max is reached
 	
-		//picks random room size
-		randroom();
-	
 		//checks if room fits or is intersecting any other room, then places	
-		if (placeroom(roomw,roomh)) {
+		//randroom integrated into placeroom function call
+		if (placeroom(randInt(minw,maxw),randInt(minh,maxh))) {
 			rmax-=1;
 		}
 		
 	} while (rmax);
 }
 
+/*
 void randroom(){
 	//get new number  if below minimum
 	//do {
 	//	roomw = (rand() % maxside+1);
 	//} while (roomw<minside);
-	roomw = randInt(minside,maxside);
+	roomw = randInt(minw,maxw);
 	
 	//get new number if below minimum
 	//do {
 	//	roomh = (rand() % maxside+1);
 	//} while (roomh<minside);
-	roomh = randInt(minside,maxside);
+	roomh = randInt(minw,maxw);
 }
-
+*/
 
 
 bool placeroom(width,height){
@@ -162,15 +159,9 @@ bool placeroom(width,height){
 	int fmax = 10;
 	
 	/* Random Room Coords*/
-	//do {
-	//	placex = (rand() % 48);
-	//} while ((placex+width>=mapw-1) || (placex == 0));
-	placex = randInt(1, mapw-width);
+	placex = randInt(1, mapw-width-1);
+	placey = randInt(1, maph-height-1);
 	
-	//do {
-	//	placey = (rand() % 48);
-	//} while ((placey+height>=maph-1) || (placey == 0));
-	placey = randInt(1, maph-height);
 	
 	do {
 		if (doesroomfit(placex,placey,width,height)){  //check if room fits
@@ -183,12 +174,18 @@ bool placeroom(width,height){
 			return true;
 		}
 		                         // if room doesn't fit, decrease size
+		
 		fmax-=1;
-		if (width > maxside) {
-			width-=1;
-		}
-		if (height > maxside) {
-			height-=1;
+		
+		switch randInt(0,1){
+			case 0: 
+				if (width > maxw) {
+					width-=1;
+				}
+			case 1:
+				if (height > maxh) {
+					height-=1;
+				}
 		}
 
 			
